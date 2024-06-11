@@ -4,6 +4,7 @@ const connectDB = require("./config/db");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const path = require("path");
+const { User } = require("./models");
 
 dotenv.config();
 const app = express();
@@ -28,20 +29,34 @@ app.use(express.json({ limit: "100mb" }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 //DB
-connectDB(
+/*connectDB(
   "mongodb+srv://" +
     process.env.MONGO_USER +
     ":" +
     encodeURIComponent(process.env.MONGO_PSW) +
     "@" +
     process.env.MONGO_URI
-);
+);*/
+//Conectando mongodb desde localhost
+connectDB("mongodb://localhost:27017/");
 
 const PORT = process.env.PORT;
 const ENV = process.env.NODE_ENV;
 
 app.use(function (req, res, next) {
   console.log("METHOD:", req.method, "QUERY:", req.originalUrl);
+  next();
+});
+
+app.use(function (req, res, next) {
+  req.endpoint = req.originalUrl.split("/")[2];
+  req.method = req.method;
+  switch (req.endpoint) {
+    case "users":
+      req.Model = User;
+      break;
+  }
+
   next();
 });
 
