@@ -5,7 +5,7 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const path = require("path");
 const { User } = require("./models");
-const { exchangeRoutes } = require("./routes");
+const { exchangeRoutes, cryptoRoutes } = require("./routes");
 
 dotenv.config();
 const app = express();
@@ -67,6 +67,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/exchange", exchangeRoutes);
+app.use("/api/crypto", cryptoRoutes);
 
 //Listen
 server.listen(PORT, () =>

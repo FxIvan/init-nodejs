@@ -1,5 +1,7 @@
-const exchangeRoutes = require("./exchange");
+const exchangeRoutes = require("./exchangeRoutes");
+const cryptoRoutes = require("./cryptoRoutes");
 
 module.exports = {
   exchangeRoutes,
+  cryptoRoutes,
 };
