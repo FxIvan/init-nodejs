@@ -5,6 +5,7 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const path = require("path");
 const { User } = require("./models");
+const { exchangeRoutes } = require("./routes");
 
 dotenv.config();
 const app = express();
@@ -64,6 +65,9 @@ app.use(function (req, res, next) {
 app.get("/", (req, res) => {
   res.send("Api running....");
 });
+
+app.use("/api/exchange", exchangeRoutes);
+
 //Listen
 server.listen(PORT, () =>
   console.log("Server started on port " + PORT, "in " + ENV + " mode")
