@@ -52,14 +52,67 @@ class Portfolio {
 
   async setOrders() {
     try {
-      const allOrders = await this.client.convertTradeHistory(
-        1715731200000,
-        1718409600000
-      );
+      const allPairs = await this.client.marginAllPairs();
+      const arrayPars = [];
+      //Longitud de  allPairs
 
-      for (let i = 0; i < allOrders.data.list.length; i++) {
-        this.orders.push(allOrders.data.list[i]);
+      //////////////////////////////////////////////
+      /*console.log(allPairs.data.length);
+      await this.client
+        .allOrders("DOGEUSDT", {
+          orderId: 52,
+        })
+        .then((response) => {
+          console.log(response.data);
+          this.orders.push(response.data);
+        });*/
+      //////////////////////////////////////////////
+
+      for (const pair of allPairs.data.slice(0, 30)) {
+        console.log("Pair ---->", pair.symbol);
+        /*const res = await this.client.allOrders("BNBUSDT", {
+          //
+          orderId: 52,
+        });
+
+        res.data.forEach((order) => {
+          arrayPars.push(order); // Agrega cada orden individualmente al array
+        });
+
+        this.orders.push(...arrayPars);
+        */
+        //const res = await this.client.marginAllOrders(pair.symbol);
+
+        //const res = await this.client.tradeFee({ symbol: pair.symbol });
+
+        //console.log("Res ---->", res.data);
       }
+
+      /*
+      allPairs.data.slice(0, 30).forEach(async (pair) => {
+        const res = await this.client.allOrders(pair.symbol, {
+          orderId: 52,
+        });
+
+        //guardar los array insertado e insertar los nuevos
+        res.data.forEach((order) => {
+          console.log("Dentro de los pares ---->", order);
+          arrayPars.push(...order, order);
+        });
+        //Assets Actuales
+        //Depositos Actuales
+        //Retiros Actuales
+        //Traer todos los depositos y con eso podremos buscar las transaccion echo con eso
+        //Ya que para comprar una crypto o cambiar se necesita una moneda base
+      });
+
+      this.orders.push(arrayPars);
+      */
+
+      const resMarginAll = await this.client.marginOrder("BNBUSDT", {
+        origClientOrderId: "",
+      });
+      console.log("Margin All Assets ---->", resMarginAll.data);
     } catch (error) {
       console.log("Error fetching all pairs:", error);
       throw error;
@@ -84,6 +137,7 @@ const getPortfolioBinance = asyncHandler(async (req, res) => {
     await portfolio.setWithdraw();
     await portfolio.setOrders();
     const { assets, deposit, withdraw, orders } = portfolio.build();
+    console.log("orders ---->", orders);
     res.status(200).json({
       success: true,
       data: {

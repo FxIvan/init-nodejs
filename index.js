@@ -39,7 +39,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
     process.env.MONGO_URI
 );*/
 //Conectando mongodb desde localhost
-connectDB("mongodb://localhost:27017/");
+//connectDB("mongodb://localhost:27017/");
 
 const PORT = process.env.PORT;
 const ENV = process.env.NODE_ENV;
