@@ -52,9 +52,13 @@ class Portfolio {
 
   async setOrders() {
     try {
+      const oneMonthsAgo = new Date().setMonth(new Date().getMonth() - 1);
+      const startTime = new Date(oneMonthsAgo).getTime();
+      const endTime = new Date().getTime();
+
       const allOrders = await this.client.convertTradeHistory(
-        1715731200000,
-        1718409600000
+        startTime,
+        endTime
       );
 
       for (let i = 0; i < allOrders.data.list.length; i++) {
