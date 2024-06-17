@@ -17,8 +17,43 @@ class Portfolio {
 
   async setAsset() {
     try {
-      const res = await this.client.userAsset();
-      this.assets.push(res.data);
+      const resTest = await this.client.marginPairIndex("ARSUSDT");
+      console.log("resTest", resTest.data);
+
+      const { data: AssetsUser } = await this.client.userAsset();
+
+      const { data: allPairs } = await this.client.marginAllPairs();
+
+      const USDTBasis = AssetsUser.map((asset) => `USDT${asset.asset}`);
+
+      const USDTAgainstBasis = AssetsUser.map((asset) => `${asset.asset}USDT`);
+
+      const availableSymbols = allPairs.map((pair) => pair.symbol);
+
+      const symbols = availableSymbols.filter((symbol) => {
+        return USDTBasis.includes(symbol) || USDTAgainstBasis.includes(symbol);
+      });
+
+      const marginAllInfo = await this.client.ticker24hr("", symbols);
+
+      AssetsUser.forEach(async (asset) => {
+        const symbol = `USDT${asset.asset}`;
+        const symbolAgainst = `${asset.asset}USDT`;
+        const symbolInfo = marginAllInfo.data.find(
+          (info) => info.symbol === symbol || info.symbol === symbolAgainst
+        );
+
+        if (symbolInfo) {
+          asset.price = symbolInfo.lastPrice;
+          asset.totalUSDT = asset.price * asset.free;
+        } else if (symbol !== "USDTUSDT") {
+          const priceAssetInfo = await this.client.marginPairIndex(symbol);
+          asset.price = priceAssetInfo.data.price;
+          asset.totalUSDT = asset.free / asset.price;
+        }
+      });
+
+      this.assets.push(AssetsUser);
     } catch (error) {
       console.log(error);
       throw error;
@@ -81,7 +116,7 @@ class Portfolio {
     this.deposit[0].forEach((deposit) => {
       this.history.push({
         type: "deposit",
-        id: deposit.id,
+        idHistory: deposit.id,
         orderId: null,
         txId: deposit.txId,
         fromAmount: null,
@@ -99,7 +134,7 @@ class Portfolio {
     this.withdraw[0].forEach((withdraw) => {
       this.history.push({
         type: "withdraw",
-        id: withdraw.id,
+        idHistory: withdraw.id,
         orderId: null,
         txId: withdraw.txId,
         fromAmount: withdraw.amount,
@@ -117,7 +152,7 @@ class Portfolio {
     this.orders.forEach((order) => {
       this.history.push({
         type: "order",
-        id: order.id,
+        idHistory: order.id || null,
         orderId: null,
         txId: order.txId,
         fromAmount: order.fromAmount,
