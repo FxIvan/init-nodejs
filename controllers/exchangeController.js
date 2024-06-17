@@ -17,9 +17,6 @@ class Portfolio {
 
   async setAsset() {
     try {
-      const resTest = await this.client.marginPairIndex("ARSUSDT");
-      console.log("resTest", resTest.data);
-
       const { data: AssetsUser } = await this.client.userAsset();
 
       const { data: allPairs } = await this.client.marginAllPairs();
@@ -36,7 +33,7 @@ class Portfolio {
 
       const marginAllInfo = await this.client.ticker24hr("", symbols);
 
-      AssetsUser.forEach(async (asset) => {
+      for (const asset of AssetsUser) {
         const symbol = `USDT${asset.asset}`;
         const symbolAgainst = `${asset.asset}USDT`;
         const symbolInfo = marginAllInfo.data.find(
@@ -45,15 +42,20 @@ class Portfolio {
 
         if (symbolInfo) {
           asset.price = symbolInfo.lastPrice;
-          asset.totalUSDT = asset.price * asset.free;
+          asset.totalUSDT = (asset.price * asset.free).toFixed(12);
         } else if (symbol !== "USDTUSDT") {
           const priceAssetInfo = await this.client.marginPairIndex(symbol);
           asset.price = priceAssetInfo.data.price;
-          asset.totalUSDT = asset.free / asset.price;
+          asset.totalUSDT = Number((asset.free / asset.price).toFixed(12));
         }
+      }
+
+      const AssetsOrder = AssetsUser.sort((a, b) => {
+        if (Number(a.totalUSDT) === Number(b.totalUSDT)) return 0;
+        return Number(b.totalUSDT) - Number(a.totalUSDT);
       });
 
-      this.assets.push(AssetsUser);
+      this.assets.push(AssetsOrder);
     } catch (error) {
       console.log(error);
       throw error;
